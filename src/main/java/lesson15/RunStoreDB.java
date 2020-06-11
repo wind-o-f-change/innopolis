@@ -72,6 +72,7 @@ public class RunStoreDB {
             System.out.println(serviceDAO.getById(new Service(2)));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+            //изменение
         }
     }
 }

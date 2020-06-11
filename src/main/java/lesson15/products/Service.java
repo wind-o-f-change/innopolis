@@ -6,6 +6,7 @@ public class Service extends Product {
         super(id, model, price, manufacturer);
     }
 
+
     @Override
     public void setId(Integer id) {
         super.setId(id);
