@@ -22,8 +22,9 @@ public class RunStoreDB {
     public static void main(String[] args) {
         try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
              Statement statement = connection.createStatement()) {
-            //  Создание таблиц c применением "Batch'ей"
-            statement.addBatch(DBUtil.createProductTable( new Accessory()));
+
+            //  Создание 3х таблиц c применением "Batch'ей"
+            statement.addBatch(DBUtil.createProductTable(new Accessory()));
             statement.addBatch(DBUtil.createProductTable(new Mobile()));
             statement.executeBatch();
             //  "Контролирруемые" коммиты с спользованием "rollback"
@@ -36,33 +37,37 @@ public class RunStoreDB {
             statement.executeUpdate(DBUtil.createProductTable(new Somethings()));
             connection.rollback(mySavepoint);
             connection.commit();
-            System.out.println(new Product(){}.getClass().getName());
             connection.setAutoCommit(true);
             System.out.println(connection.getAutoCommit());
+
+            //  operations whit a table
+            AccessoryDAOImpl accessoryDAO = new AccessoryDAOImpl(connection);
+            accessoryDAO.add(new Accessory("simple", 50, "China"));
+            accessoryDAO.add(new Accessory("carbon", 95, "XPhone"));
+
+            MobileDAOImpl mobileDAO = new MobileDAOImpl(connection);
+            mobileDAO.add(new Mobile("s20", 2000, "Samsung"));
+            mobileDAO.add(new Mobile("Xs", 3000, "XPhone"));
+
+            ServiceDAOImpl serviceDAO = new ServiceDAOImpl(connection);
+            serviceDAO.add(new Service("cleaning", 120, "\"Co. Modyars\""));
+            serviceDAO.add(new Service("fix", 300, "\"IT Fix\""));
+            //  read
+            System.out.println(serviceDAO.getById(new Service(2)));
+            System.out.println(serviceDAO.getById(new Service(1)));
+            //  update
+            serviceDAO.updateById(new Service(2, "repairs", 320, "\"ИП\" Казбек & IT\""));
+            //  delete
+            serviceDAO.deleteById(new Service(1));
+            System.out.println(serviceDAO.getById(new Service(2)));
+            System.out.println(serviceDAO.getById(new Service(1)));
+
+            // Удаление таблиц по необходимости
+//            DBUtil.dropTable(connection, new Accessory());
+//            DBUtil.dropTable(connection, new Mobile());
+//            DBUtil.dropTable(connection, new Service());
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-
-        //  operations whit a table
-        AccessoryDAOImpl accessoryDAO = new AccessoryDAOImpl();
-        accessoryDAO.add(new Accessory("simple", 50, "China"));
-        accessoryDAO.add(new Accessory("carbon", 95, "XPhone"));
-
-        MobileDAOImpl mobileDAO = new MobileDAOImpl();
-        mobileDAO.add(new Mobile("s20", 2000, "Samsung"));
-        mobileDAO.add(new Mobile("Xs", 3000, "XPhone"));
-
-        ServiceDAOImpl serviceDAO = new ServiceDAOImpl();
-        serviceDAO.add(new Service("cleaning", 120, "\"Co. Modyars\""));
-        serviceDAO.add(new Service("fix", 300, "\"IT Fix\""));
-        //  read
-        System.out.println(serviceDAO.getById(new Service(2)));
-        System.out.println(serviceDAO.getById(new Service(1)));
-        //  update
-        serviceDAO.updateById(new Service(2,"repairs", 320, "\"ИП\" Казбек & IT\""));
-        //  delete
-        serviceDAO.deleteById(new Service(1));
-        System.out.println(serviceDAO.getById(new Service(2)));
-        System.out.println(serviceDAO.getById(new Service(1)));
     }
 }

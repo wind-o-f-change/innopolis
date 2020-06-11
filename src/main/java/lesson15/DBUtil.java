@@ -10,22 +10,15 @@ import java.sql.Statement;
 @NoArgsConstructor
 public class DBUtil {
 
-    public static <P extends Product> boolean renewTable(Connection connection, P type) {
+    public static <P extends Product> void dropTable(Connection connection, P type) {
 
         try (Statement statement = connection.createStatement()
         ) {
             String tableName = type.getClass().getSimpleName().toLowerCase();
-
-            return statement.execute(String.format("\"DROP TABLE IF EXISTS %s;\"\n" +
-                    "create table %s (\n) id SERIAL PRIMARY KEY NOT NULL, \n" +
-                    "model VARCHAR(20) NOT NULL \n price INTEGER NOT NULL \n" +
-                    "manufacturer VARCHAR (20) NOT NULL; \n", tableName, tableName)
-            );
+            statement.executeUpdate("DROP TABLE IF EXISTS " + tableName);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-
-        return false;
     }
 
     // этот метод для демонстрации "Batch'ей по заданию"
