@@ -10,7 +10,6 @@ import lombok.*;
 
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class Product {
@@ -27,5 +26,15 @@ public abstract class Product {
 
     public Product(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return  this.getClass().getSimpleName() + "{" +
+                "id=" + id +
+                ", model='" + model + '\'' +
+                ", price=" + price +
+                ", manufacturer='" + manufacturer + '\'' +
+                '}';
     }
 }
