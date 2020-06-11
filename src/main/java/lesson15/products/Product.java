@@ -8,10 +8,11 @@ import lombok.*;
  * @autor Evtushenko Anton
  */
 
-@ToString
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public abstract class Product {
     private Integer id;
     private String model;

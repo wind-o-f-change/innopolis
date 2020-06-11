@@ -1,17 +1,16 @@
 package lesson15;
 
 import lesson15.products.Product;
+import lombok.NoArgsConstructor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+@NoArgsConstructor
 public class DBUtil {
 
-    private DBUtil() {
-    }
-
-    public static <T extends Product> boolean renewTable(Connection connection, T type) {
+    public static <P extends Product> boolean renewTable(Connection connection, P type) {
 
         try (Statement statement = connection.createStatement()
         ) {
@@ -30,7 +29,8 @@ public class DBUtil {
     }
 
     // этот метод для демонстрации "Batch'ей по заданию"
-    public static String createProductTable(String name) {
+    public static <P extends Product> String createProductTable(P product) {
+        String tableName = product.getClass().getSimpleName().toLowerCase();
 
             return String.format(
                     "CREATE TABLE %s(\n" +
@@ -38,7 +38,7 @@ public class DBUtil {
                     "model VARCHAR(20) NOT NULL,\n" +
                     "price INTEGER NOT NULL,\n" +
                     "manufacturer VARCHAR (20) NOT NULL" +
-                    ");", name
+                    ");", tableName
             );
     }
 }

@@ -1,6 +1,11 @@
 package lesson15.products;
 
 public class Service extends Product {
+
+    public Service(Integer id, String model, Integer price, String manufacturer) {
+        super(id, model, price, manufacturer);
+    }
+
     @Override
     public void setId(Integer id) {
         super.setId(id);
