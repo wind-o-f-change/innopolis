@@ -28,7 +28,7 @@ public class RunStoreDB {
             DBUtil.dropTable(connection, new Mobile());
             DBUtil.dropTable(connection, new Service());
 
-            //  Создание 3х таблиц c применением "Batch'ей"
+            //  Создание 2х таблиц c применением "Batch'ей"
             statement.addBatch(DBUtil.createProductTable(new Accessory()));
             statement.addBatch(DBUtil.createProductTable(new Mobile()));
             statement.executeBatch();

@@ -8,9 +8,7 @@
     <artifactId>innopolis</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
-<!--    <properties>-->
-<!--        <property name="SQL.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>-->
-<!--    </properties>-->
+
     <build>
         <plugins>
             <plugin>

@@ -1,6 +1,9 @@
 package lesson15.dao;
 
 import lesson15.products.Product;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.sql.*;
 
@@ -10,19 +13,15 @@ import java.sql.*;
  * @autor Evtushenko Anton
  */
 
+@NoArgsConstructor
+@RequiredArgsConstructor
 public abstract class AbstractDAO<P extends Product> {
+    @NonNull
     Connection cn;
 
-    public AbstractDAO(Connection connection){
-        this.cn = connection;
-    }
-
-    private AbstractDAO(){}
-
     public void add(P product) {
-        String tableName = product.getClass().getSimpleName().toLowerCase();
         try (PreparedStatement ps = cn.prepareStatement(
-                     "insert into " + tableName + " values(DEFAULT, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
+                "insert into " + getTableName(product) + " values(DEFAULT, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, product.getModel());
             ps.setInt(2, product.getPrice());
             ps.setString(3, product.getManufacturer());
@@ -35,7 +34,7 @@ public abstract class AbstractDAO<P extends Product> {
 
     public P getById(P product) {
         try (PreparedStatement ps = cn.prepareStatement(
-                     "select * from " + getTableName(product) + " where id = ?")) {
+                "select * from " + getTableName(product) + " where id = ?")) {
             long id = product.getId();
             ps.setLong(1, id);
 
@@ -45,7 +44,8 @@ public abstract class AbstractDAO<P extends Product> {
                     product.setPrice(resultSet.getInt(3));
                     product.setManufacturer(resultSet.getString(4));
 
-                } else throw new IllegalArgumentException(String.format("Продукт %s с таким id не существует", product.getClass().getSimpleName()));
+                } else
+                    throw new IllegalArgumentException(String.format("Продукт %s с таким id не существует", product.getClass().getSimpleName()));
             }
             return product;
 
@@ -57,8 +57,8 @@ public abstract class AbstractDAO<P extends Product> {
 
     public void updateById(P product) {
         try (PreparedStatement ps = cn.prepareStatement(
-                     "update " + getTableName(product) + " set model = ?, price = ?, manufacturer = ?" +
-                             " where id= ?")
+                "update " + getTableName(product) + " set model = ?, price = ?, manufacturer = ?" +
+                        " where id= ?")
         ) {
             ps.setString(1, product.getModel());
             ps.setInt(2, product.getPrice());
