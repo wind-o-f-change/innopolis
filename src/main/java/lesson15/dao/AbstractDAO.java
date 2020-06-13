@@ -19,17 +19,22 @@ public abstract class AbstractDAO<P extends Product> {
     @NonNull
     Connection cn;
 
-    public void add(P product) {
+    public boolean add(P product) {
         try (PreparedStatement ps = cn.prepareStatement(
-                "insert into " + getTableName(product) + " values(DEFAULT, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
+                "insert into "
+                        + getTableName(product)
+                        + " values(DEFAULT, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
+
             ps.setString(1, product.getModel());
             ps.setInt(2, product.getPrice());
             ps.setString(3, product.getManufacturer());
             ps.executeUpdate();
 
+            return true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+        return false;
     }
 
     public P getById(P product) {
@@ -55,7 +60,7 @@ public abstract class AbstractDAO<P extends Product> {
         return null;
     }
 
-    public void updateById(P product) {
+    public boolean updateById(P product) {
         try (PreparedStatement ps = cn.prepareStatement(
                 "update " + getTableName(product) + " set model = ?, price = ?, manufacturer = ?" +
                         " where id= ?")
@@ -64,23 +69,27 @@ public abstract class AbstractDAO<P extends Product> {
             ps.setInt(2, product.getPrice());
             ps.setString(3, product.getManufacturer());
             ps.setInt(4, product.getId());
-            ps.executeUpdate();
+            ps.execute();
 
+            return true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+        return false;
     }
 
-    public void deleteById(P product) {
+    public boolean deleteById(P product) {
         try (PreparedStatement ps = cn.prepareStatement(
                 "delete from " + getTableName(product) + " where id = ?")
         ) {
             ps.setInt(1, product.getId());
             ps.executeUpdate();
 
+            return true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+        return false;
     }
 
     private String getTableName(P product) {

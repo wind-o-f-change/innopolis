@@ -10,15 +10,17 @@ import java.sql.Statement;
 @NoArgsConstructor
 public class DBUtil {
 
-    public static <P extends Product> void dropTable(Connection connection, P type) {
+    public static <P extends Product> boolean dropTable(Connection connection, P type) {
 
         try (Statement statement = connection.createStatement()
         ) {
             String tableName = type.getClass().getSimpleName().toLowerCase();
-            statement.executeUpdate("DROP TABLE IF EXISTS " + tableName);
+            return statement.execute("DROP TABLE IF EXISTS " + tableName);
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+        return false;
     }
 
     // этот метод для демонстрации "Batch'ей по заданию"
