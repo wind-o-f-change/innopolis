@@ -28,9 +28,8 @@ public abstract class AbstractDAO<P extends Product> {
             ps.setString(1, product.getModel());
             ps.setInt(2, product.getPrice());
             ps.setString(3, product.getManufacturer());
-            ps.executeUpdate();
+            return ps.execute();
 
-            return true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -40,8 +39,8 @@ public abstract class AbstractDAO<P extends Product> {
     public P getById(P product) {
         try (PreparedStatement ps = cn.prepareStatement(
                 "select * from " + getTableName(product) + " where id = ?")) {
-            long id = product.getId();
-            ps.setLong(1, id);
+
+            ps.setLong(1, product.getId());
 
             try (ResultSet resultSet = ps.executeQuery()) {
                 if (resultSet.next()) {
@@ -69,9 +68,8 @@ public abstract class AbstractDAO<P extends Product> {
             ps.setInt(2, product.getPrice());
             ps.setString(3, product.getManufacturer());
             ps.setInt(4, product.getId());
-            ps.execute();
+            return ps.execute();
 
-            return true;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -83,9 +81,8 @@ public abstract class AbstractDAO<P extends Product> {
                 "delete from " + getTableName(product) + " where id = ?")
         ) {
             ps.setInt(1, product.getId());
-            ps.executeUpdate();
 
-            return true;
+            return ps.execute();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

@@ -33,7 +33,7 @@ public class RunStoreDB {
             statement.addBatch(DBUtil.createProductTable(new Mobile()));
             statement.executeBatch();
             //  "Контролирруемые" коммиты с спользованием "rollback"
-            System.out.println(connection.getAutoCommit());
+            System.out.println("AutoCommit is: "+ connection.getAutoCommit());
             connection.setAutoCommit(false);
             statement.executeUpdate(DBUtil.createProductTable(new Service()));
 
@@ -43,12 +43,12 @@ public class RunStoreDB {
             connection.rollback(mySavepoint);
             connection.commit();
             connection.setAutoCommit(true);
-            System.out.println(connection.getAutoCommit());
+            System.out.println("AutoCommit is: "+ connection.getAutoCommit());
 
             //  operations whit a table
             AccessoryDAOImpl accessoryDAO = new AccessoryDAOImpl(connection);
-            accessoryDAO.add(new Accessory("simple", 50, "China"));
-            accessoryDAO.add(new Accessory("carbon", 95, "XPhone"));
+            accessoryDAO.add(new Accessory("simple case", 50, "China"));
+            accessoryDAO.add(new Accessory("carbon case", 95, "XPhone"));
 
 
             MobileDAOImpl mobileDAO = new MobileDAOImpl(connection);
