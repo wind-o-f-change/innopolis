@@ -8,9 +8,7 @@ import lesson15.products.*;
 import java.sql.*;
 
 /**
- * Create 07.06.2020
- *
- * @autor Evtushenko Anton
+ * Create Evtushenko Anton
  */
 
 public class RunStoreDB {
