@@ -34,6 +34,8 @@ public class AccessoryDAOImplTest {
     @Mock
     private ResultSet resultSetMock;
 
+    // НАСТАВНИК
+    // Это уже лишнее, MockitoExtension сделает это за нас
     @BeforeEach
     void setUp() {
         initMocks(this);
@@ -52,6 +54,14 @@ public class AccessoryDAOImplTest {
         verify(preparedStatement, times(0)).execute();
     }
 
+    // НАСТАВНИК
+    // в одном тесте вы проверяете разные кейсы
+    // Но правильно заводить отдельный метод на каждый кейс
+    // то есть отдельно для
+    // IllegalArgumentException
+    // Equals
+    // NPE
+    // null
     @Test
     void getById() throws SQLException {
         when(connection.prepareStatement(SELECT_FROM_ACCESSORY)).thenReturn(preparedStatement);
@@ -83,6 +93,8 @@ public class AccessoryDAOImplTest {
         verify(preparedStatement, times(1)).execute();
     }
 
+    // НАСТАВНИК
+    // А где тест на успешное удаление?
     @Test
     void deleteById() throws SQLException {
         when(connection.prepareStatement(DELETE_FROM_ACCESSORY)).thenReturn(preparedStatement);

@@ -19,6 +19,9 @@ public abstract class AbstractDAO<P extends Product> {
     @NonNull
     Connection cn;
 
+    // НАСТАВНИК
+    // мы это не обсудили на прошлой консультации, но нужно кое-что отметить по интерфейсу
+    // при добавлении лучше всего возвращать сгененренный айди
     public boolean add(P product) {
         try (PreparedStatement ps = cn.prepareStatement(
                 "insert into "
@@ -59,6 +62,9 @@ public abstract class AbstractDAO<P extends Product> {
         return null;
     }
 
+    // НАСТАВНИК
+    // при обновлении  лучше не возвращать ничего, а то, получилось у нас записать в базу или нет
+    // должно быть понятно через то, выбрасили ли мы исключение или нет
     public boolean updateById(P product) {
         try (PreparedStatement ps = cn.prepareStatement(
                 "update " + getTableName(product) + " set model = ?, price = ?, manufacturer = ?" +
@@ -76,6 +82,9 @@ public abstract class AbstractDAO<P extends Product> {
         return false;
     }
 
+    // НАСТАВНИК
+    // при удалении  лучше не возвращать ничего, а то, получилось у нас записать в базу или нет
+    // должно быть понятно через то, выбрасили ли мы исключение или нет
     public boolean deleteById(P product) {
         try (PreparedStatement ps = cn.prepareStatement(
                 "delete from " + getTableName(product) + " where id = ?")
