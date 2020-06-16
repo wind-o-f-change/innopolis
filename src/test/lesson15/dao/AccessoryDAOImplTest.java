@@ -90,7 +90,7 @@ public class AccessoryDAOImplTest {
         //  NPE
         assertThrows(NullPointerException.class, () -> accessoryDAO.deleteById(null));
 
-        //
+        // False
         assertFalse(accessoryDAO.deleteById(accessory));
     }
 }

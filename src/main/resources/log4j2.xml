@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Appenders>
+    <File name="log" fileName="src/main/resources/logs/log.log">
+      <PatternLayout>
+        <Pattern>%d %p %c{1.} [%t] %m %ex%n</Pattern>
+      </PatternLayout>
+    </File>
+    <File name="log2" fileName="src/main/resources/logs/log2.log">
+      <MarkerFilter marker="consoleonly" onMatch="DENY" onMismatch="ACCEPT"/>
+      <PatternLayout>
+        <Pattern>%d %p %c{1.} [%t] %m %ex%n</Pattern>
+      </PatternLayout>
+    </File>
+    <Console name="stdout" target="SYSTEM_ERR">
+      <PatternLayout pattern="%m%n"/>
+    </Console>
+    <Console name="consl" target="SYSTEM_OUT">
+      <PatternLayout pattern="%m%n"/>
+    </Console>
+<!--    <JDBC name="db" tableName="logs">-->
+<!--      <DriverManager connectionString="jdbc:postgresql://127.0.0.1:5432/postgres" driverClassName="org.postgresql.Driver"-->
+<!--                     username="postgres" password="4444"/>-->
+<!--      <Column name="LOG_ID" pattern="%u" isUnicode="false"/>-->
+<!--      <Column name="ENTRY_DATE" isEventTimestamp="true" isUnicode="false"/>-->
+<!--      <Column name="LOGGER" pattern="%logger" isUnicode="false"/>-->
+<!--      <Column name="LOG_LEVEL" pattern="%level" isUnicode="false"/>-->
+<!--      <Column name="MESSAGE" pattern="%m" isUnicode="false"/>-->
+<!--      <Column name="EXCEPTION" pattern="%throwable " isUnicode="false"/>-->
+<!--    </JDBC>-->
+  </Appenders>
+  <Loggers>
+    <Root level="trace">
+      <AppenderRef ref="log" level="trace"/>
+      <AppenderRef ref="consl" level="trace"/>
+    </Root>
+    <Logger name="RunStoreDB" level="info" additivity="false">
+      <AppenderRef ref="log2" level="error"/>
+      <AppenderRef ref="stdout" level="error"/>
+<!--      <AppenderRef ref="db" level="INFO"/>-->
+    </Logger>
+    <Logger name="example_logger" level="trace" additivity="false">
+      <AppenderRef ref="log" level="trace"/>
+      <AppenderRef ref="log2" level="info"/>
+      <AppenderRef ref="stdout" level="info"/>
+    </Logger>
+  </Loggers>
+</Configuration>

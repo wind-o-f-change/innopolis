@@ -2,6 +2,8 @@ package lesson15;
 
 import lesson15.products.Product;
 import lombok.NoArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.event.Level;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,7 +20,7 @@ public class DBUtil {
             return statement.execute("DROP TABLE IF EXISTS " + tableName);
 
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+//              AscasfAfAsczczxc
         }
         return false;
     }

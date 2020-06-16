@@ -4,6 +4,8 @@ import lesson15.products.Product;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 
@@ -16,6 +18,8 @@ import java.sql.*;
 @NoArgsConstructor
 @RequiredArgsConstructor
 public abstract class AbstractDAO<P extends Product> {
+    private static Logger LOGGER_DAO = LoggerFactory.getLogger(AccessoryDAOImpl.class);
+
     @NonNull
     Connection cn;
 
@@ -31,7 +35,7 @@ public abstract class AbstractDAO<P extends Product> {
             return ps.execute();
 
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            LOGGER_DAO.error(throwables.toString() + " in 'add' method");
         }
         return false;
     }
@@ -54,7 +58,7 @@ public abstract class AbstractDAO<P extends Product> {
             return product;
 
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            LOGGER_DAO.error(throwables.toString() + " in 'getByID' method");
         }
         return null;
     }
@@ -71,7 +75,7 @@ public abstract class AbstractDAO<P extends Product> {
             return ps.execute();
 
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            LOGGER_DAO.error(throwables.toString() + " in 'updateById' method");
         }
         return false;
     }
@@ -84,7 +88,7 @@ public abstract class AbstractDAO<P extends Product> {
 
             return ps.execute();
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            LOGGER_DAO.error(throwables.toString() + " in 'deleteById' method");
         }
         return false;
     }
