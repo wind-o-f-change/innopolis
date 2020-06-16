@@ -7,7 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Create 08.06.2020
@@ -34,8 +37,8 @@ public abstract class AbstractDAO<P extends Product> {
             ps.setString(3, product.getManufacturer());
             return ps.execute();
 
-        } catch (SQLException throwables) {
-            LOGGER_DAO.error(throwables.toString() + " in 'add' method");
+        } catch (SQLException e) {
+            LOGGER_DAO.error(e + " in 'add()' method");
         }
         return false;
     }
@@ -57,8 +60,8 @@ public abstract class AbstractDAO<P extends Product> {
             }
             return product;
 
-        } catch (SQLException throwables) {
-            LOGGER_DAO.error(throwables.toString() + " in 'getByID' method");
+        } catch (SQLException e) {
+            LOGGER_DAO.error(e + " in 'getByID()' method");
         }
         return null;
     }
@@ -74,8 +77,8 @@ public abstract class AbstractDAO<P extends Product> {
             ps.setInt(4, product.getId());
             return ps.execute();
 
-        } catch (SQLException throwables) {
-            LOGGER_DAO.error(throwables.toString() + " in 'updateById' method");
+        } catch (SQLException e) {
+            LOGGER_DAO.error(e + " in 'updateById()' method");
         }
         return false;
     }
@@ -87,8 +90,8 @@ public abstract class AbstractDAO<P extends Product> {
             ps.setInt(1, product.getId());
 
             return ps.execute();
-        } catch (SQLException throwables) {
-            LOGGER_DAO.error(throwables.toString() + " in 'deleteById' method");
+        } catch (SQLException e) {
+            LOGGER_DAO.error(e + " in 'deleteById()' method");
         }
         return false;
     }

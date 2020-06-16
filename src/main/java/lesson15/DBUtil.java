@@ -2,8 +2,8 @@ package lesson15;
 
 import lesson15.products.Product;
 import lombok.NoArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.event.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -11,7 +11,7 @@ import java.sql.Statement;
 
 @NoArgsConstructor
 public class DBUtil {
-
+    private static Logger log = LogManager.getLogger("DBUtil");
     public static <P extends Product> boolean dropTable(Connection connection, P type) {
 
         try (Statement statement = connection.createStatement()
@@ -19,8 +19,8 @@ public class DBUtil {
             String tableName = type.getClass().getSimpleName().toLowerCase();
             return statement.execute("DROP TABLE IF EXISTS " + tableName);
 
-        } catch (SQLException throwables) {
-//              AscasfAfAsczczxc
+        } catch (SQLException e) {
+            log.error(e);
         }
         return false;
     }
