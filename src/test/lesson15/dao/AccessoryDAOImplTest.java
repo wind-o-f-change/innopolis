@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -24,7 +25,7 @@ public class AccessoryDAOImplTest {
     public final String UPDATE_ACCESSORY = "update accessory set model = ?, price = ?, manufacturer = ? where id= ?";
     public final String DELETE_FROM_ACCESSORY = "delete from accessory where id = ?";
 
-    Accessory accessory = new Accessory(32,"easy case", 1200, "China");
+    Accessory accessory = new Accessory(32, "easy case", 1200, "China");
     @InjectMocks
     AccessoryDAOImpl accessoryDAO;
     @Mock
@@ -34,63 +35,109 @@ public class AccessoryDAOImplTest {
     @Mock
     private ResultSet resultSetMock;
 
-    @BeforeEach
-    void setUp() {
-        initMocks(this);
+    @Test
+    void add_NPE() {
+        assertThrows(NullPointerException.class, () -> accessoryDAO.add(null));
     }
 
     @Test
-    void add() throws SQLException {
+    void add_SQLException() throws SQLException {
         when(connection.prepareStatement(INSERT_INTO_ACCESSORY, PreparedStatement.RETURN_GENERATED_KEYS)).thenReturn(preparedStatement);
         doThrow(SQLException.class).when(preparedStatement).setString(anyInt(), anyString());
 
-        assertFalse(accessoryDAO.add(accessory));
+        assertNull(accessoryDAO.add(accessory));
 
         verify(connection, times(1)).prepareStatement(INSERT_INTO_ACCESSORY, PreparedStatement.RETURN_GENERATED_KEYS);
         verify(preparedStatement, times(1)).setString(anyInt(), anyString());
         verify(preparedStatement, times(0)).setInt(anyInt(), anyInt());
-        verify(preparedStatement, times(0)).execute();
+        verify(preparedStatement, times(0)).executeUpdate();
+    }
+
+    @Test
+    void add_NotNull() throws SQLException {
+        when(connection.prepareStatement(INSERT_INTO_ACCESSORY, PreparedStatement.RETURN_GENERATED_KEYS)).thenReturn(preparedStatement);
+        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSetMock);
+        when(resultSetMock.next()).thenReturn(true);
+        when(resultSetMock.getInt(1)).thenReturn(new Random().nextInt(99999));
+        Integer res = accessoryDAO.add(new Accessory("easy case", 1200, "China"));
+        System.out.println(String.format("Generated key equals: '%d'", res));
+        assertNotNull(res);
     }
 
     @Test
     void getById() throws SQLException {
         when(connection.prepareStatement(SELECT_FROM_ACCESSORY)).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenReturn(resultSetMock);
-
-        //  IllegalArgumentException
-        assertThrows(IllegalArgumentException.class, ()->accessoryDAO.getById(new Accessory(2)));
-
         when(resultSetMock.next()).thenReturn(true);
-        //  Equals
+
         assertEquals(accessory, accessoryDAO.getById(accessory));
-        //  NPE
+    }
+
+    @Test
+    void getById_NPE() {
         assertThrows(NullPointerException.class, ()-> accessoryDAO.getById(null));
-        //  null
+    }
+
+    @Test
+    void getById_SQLException() throws SQLException {
+        when(connection.prepareStatement(SELECT_FROM_ACCESSORY)).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenThrow(SQLException.class);
+
+        assertNull(accessoryDAO.getById(accessory));
+    }
+
+    @Test
+    void getById_IllegalArgumentException() throws SQLException {
+        when(connection.prepareStatement(SELECT_FROM_ACCESSORY)).thenReturn(preparedStatement);
+        when(preparedStatement.executeQuery()).thenReturn(resultSetMock);
+
         assertNull(accessoryDAO.getById(accessory));
     }
 
     @Test
     void updateById() throws SQLException {
         when(connection.prepareStatement(UPDATE_ACCESSORY)).thenReturn(preparedStatement);
-        when(preparedStatement.execute()).thenThrow(SQLException.class);
+        when(preparedStatement.executeUpdate()).thenReturn(1);
 
-        assertFalse(accessoryDAO.updateById(accessory));
+        assertTrue(accessoryDAO.updateById(accessory) > 0);
 
         verify(connection, times(1)).prepareStatement(UPDATE_ACCESSORY);
         verify(preparedStatement, times(2)).setString(anyInt(), anyString());
         verify(preparedStatement, times(2)).setInt(anyInt(), anyInt());
-        verify(preparedStatement, times(1)).execute();
+        verify(preparedStatement, times(1)).executeUpdate();
+    }
+
+    @Test
+    void updateById_NPE() {
+        assertThrows(NullPointerException.class, ()-> accessoryDAO.updateById(null));
+    }
+
+    @Test
+    void updateById_SQLException() throws SQLException {
+        when(connection.prepareStatement(UPDATE_ACCESSORY)).thenReturn(preparedStatement);
+        when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
+
+        assertNull(accessoryDAO.updateById(accessory));
     }
 
     @Test
     void deleteById() throws SQLException {
         when(connection.prepareStatement(DELETE_FROM_ACCESSORY)).thenReturn(preparedStatement);
+        when(preparedStatement.executeUpdate()).thenReturn(1);
 
-        //  NPE
+        assertTrue(accessoryDAO.deleteById(accessory) > 0);
+    }
+
+    @Test
+    void deleteById_NPE() {
         assertThrows(NullPointerException.class, () -> accessoryDAO.deleteById(null));
+    }
 
-        // False
-        assertFalse(accessoryDAO.deleteById(accessory));
+    @Test
+    void deleteById_SQLException() throws SQLException {
+        when(connection.prepareStatement(DELETE_FROM_ACCESSORY)).thenReturn(preparedStatement);
+        when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
+
+        assertNull(accessoryDAO.deleteById(accessory));
     }
 }
