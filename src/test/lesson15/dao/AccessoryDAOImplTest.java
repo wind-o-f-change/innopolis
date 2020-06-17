@@ -38,6 +38,7 @@ public class AccessoryDAOImplTest {
     @Test
     void add() throws SQLException {
         when(connection.prepareStatement(INSERT_INTO_ACCESSORY, PreparedStatement.RETURN_GENERATED_KEYS)).thenReturn(preparedStatement);
+        when(preparedStatement.executeUpdate()).thenReturn(1);
         when(preparedStatement.getGeneratedKeys()).thenReturn(resultSetMock);
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.getInt(1)).thenReturn(12);
@@ -48,6 +49,22 @@ public class AccessoryDAOImplTest {
     @Test
     void add_NPE() {
         assertThrows(NullPointerException.class, () -> accessoryDAO.add(null));
+    }
+
+    @Test
+    void addErr() throws SQLException {
+        when(connection.prepareStatement(INSERT_INTO_ACCESSORY, PreparedStatement.RETURN_GENERATED_KEYS)).thenReturn(preparedStatement);
+        when(preparedStatement.executeUpdate()).thenReturn(0);
+        assertThrows(RuntimeException.class, ()-> accessoryDAO.updateById(accessory));
+    }
+
+    @Test
+    void add_GenIdErr() throws SQLException {
+        when(connection.prepareStatement(INSERT_INTO_ACCESSORY, PreparedStatement.RETURN_GENERATED_KEYS)).thenReturn(preparedStatement);
+        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSetMock);
+        when(resultSetMock.next()).thenReturn(false);
+
+        assertThrows(RuntimeException.class, ()-> accessoryDAO.updateById(accessory));
     }
 
     @Test
@@ -90,7 +107,7 @@ public class AccessoryDAOImplTest {
         when(connection.prepareStatement(SELECT_FROM_ACCESSORY)).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenReturn(resultSetMock);
 
-        assertNull(accessoryDAO.getById(accessory));
+        assertThrows(IllegalArgumentException.class, ()-> accessoryDAO.getById(accessory));
     }
 
     @Test
@@ -98,7 +115,7 @@ public class AccessoryDAOImplTest {
         when(connection.prepareStatement(UPDATE_ACCESSORY)).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(1);
 
-        assertTrue(accessoryDAO.updateById(accessory) > 0);
+        assertDoesNotThrow(()-> accessoryDAO.updateById(accessory));
 
         verify(connection, times(1)).prepareStatement(UPDATE_ACCESSORY);
         verify(preparedStatement, times(2)).setString(anyInt(), anyString());
@@ -112,11 +129,11 @@ public class AccessoryDAOImplTest {
     }
 
     @Test
-    void updateById_SQLException() throws SQLException {
+    void updateById_RuntimeException() throws SQLException {
         when(connection.prepareStatement(UPDATE_ACCESSORY)).thenReturn(preparedStatement);
-        when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
+        when(preparedStatement.executeUpdate()).thenReturn(0);
 
-        assertNull(accessoryDAO.updateById(accessory));
+        assertThrows(RuntimeException.class, ()-> accessoryDAO.updateById(accessory));
     }
 
     @Test
@@ -124,7 +141,7 @@ public class AccessoryDAOImplTest {
         when(connection.prepareStatement(DELETE_FROM_ACCESSORY)).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(1);
 
-        assertTrue(accessoryDAO.deleteById(accessory) > 0);
+        assertDoesNotThrow(()-> accessoryDAO.deleteById(accessory));
     }
 
     @Test
@@ -133,10 +150,10 @@ public class AccessoryDAOImplTest {
     }
 
     @Test
-    void deleteById_SQLException() throws SQLException {
+    void deleteById_RuntimeException() throws SQLException {
         when(connection.prepareStatement(DELETE_FROM_ACCESSORY)).thenReturn(preparedStatement);
-        when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
+        when(preparedStatement.executeUpdate()).thenReturn(0);
 
-        assertNull(accessoryDAO.deleteById(accessory));
+        assertThrows(RuntimeException.class, ()-> accessoryDAO.deleteById(accessory));
     }
 }

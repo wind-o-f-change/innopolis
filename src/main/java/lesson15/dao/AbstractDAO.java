@@ -36,12 +36,15 @@ public abstract class AbstractDAO<P extends Product> {
             ps.setString(1, product.getModel());
             ps.setInt(2, product.getPrice());
             ps.setString(3, product.getManufacturer());
-            ps.executeUpdate();
+            if (ps.executeUpdate() < 1)
+                throw new RuntimeException(String.format(
+                        "Добавление товара '%s' -> ошибка выполнения!"
+                        , getTableName(product)));
 
-            try (ResultSet generatedKey = ps.getGeneratedKeys()) {
-                if (generatedKey.next()) {
-                    return generatedKey.getInt(1);
-                }
+            try (ResultSet generatedKeySet = ps.getGeneratedKeys()) {
+                if (generatedKeySet.next()) {
+                    return generatedKeySet.getInt(1);
+                } else throw new RuntimeException("Ошибка генерации 'id' товара");
             }
 
         } catch (SQLException e) {
@@ -63,19 +66,19 @@ public abstract class AbstractDAO<P extends Product> {
                     product.setManufacturer(resultSet.getString(4));
 
                 } else
-                    throw new IllegalArgumentException(String.format("Продукт '%s' с таким id не существует", product.getClass().getSimpleName()));
+                    throw new IllegalArgumentException(String.format(
+                            "Продукт '%s' с таким id не существует!"
+                            , getTableName(product)));
             }
             return product;
 
         } catch (SQLException e) {
             LOGGER_DAO.error(e + " in 'getByID()' method");
-        } catch (IllegalArgumentException e) {
-            LOGGER_DAO.info(e + " in 'getByID()' method");
         }
         return null;
     }
 
-    public Integer updateById(P product) {
+    public void updateById(P product) {
         try (PreparedStatement ps = cn.prepareStatement(
                 "update " + getTableName(product) + " set model = ?, price = ?, manufacturer = ?" +
                         " where id= ?")
@@ -84,25 +87,30 @@ public abstract class AbstractDAO<P extends Product> {
             ps.setInt(2, product.getPrice());
             ps.setString(3, product.getManufacturer());
             ps.setInt(4, product.getId());
-            return ps.executeUpdate();
+
+            if (ps.executeUpdate() < 1)
+                throw new RuntimeException(String.format(
+                        "Заданные параменты товара '%s' не изменены! Возможно они совпадают."
+                        , getTableName(product)));
 
         } catch (SQLException e) {
             LOGGER_DAO.error(e + " in 'updateById()' method");
         }
-        return null;
     }
 
-    public Integer deleteById(P product) {
+    public void deleteById(P product) {
         try (PreparedStatement ps = cn.prepareStatement(
                 "delete from " + getTableName(product) + " where id = ?")
         ) {
             ps.setInt(1, product.getId());
-            return ps.executeUpdate();
+            if (ps.executeUpdate() < 1)
+                throw new RuntimeException(String.format(
+                        "Удаление товара '%s' -> ошибка выполнения!"
+                        , getTableName(product)));
 
         } catch (SQLException e) {
             LOGGER_DAO.error(e + " in 'deleteById()' method");
         }
-        return null;
     }
 
     private String getTableName(P product) {
