@@ -36,6 +36,16 @@ public class AccessoryDAOImplTest {
     private ResultSet resultSetMock;
 
     @Test
+    void add() throws SQLException {
+        when(connection.prepareStatement(INSERT_INTO_ACCESSORY, PreparedStatement.RETURN_GENERATED_KEYS)).thenReturn(preparedStatement);
+        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSetMock);
+        when(resultSetMock.next()).thenReturn(true);
+        when(resultSetMock.getInt(1)).thenReturn(12);
+
+        assertTrue(accessoryDAO.add(new Accessory("easy case", 1200, "China")) > 0);
+    }
+
+    @Test
     void add_NPE() {
         assertThrows(NullPointerException.class, () -> accessoryDAO.add(null));
     }
@@ -51,17 +61,6 @@ public class AccessoryDAOImplTest {
         verify(preparedStatement, times(1)).setString(anyInt(), anyString());
         verify(preparedStatement, times(0)).setInt(anyInt(), anyInt());
         verify(preparedStatement, times(0)).executeUpdate();
-    }
-
-    @Test
-    void add_NotNull() throws SQLException {
-        when(connection.prepareStatement(INSERT_INTO_ACCESSORY, PreparedStatement.RETURN_GENERATED_KEYS)).thenReturn(preparedStatement);
-        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSetMock);
-        when(resultSetMock.next()).thenReturn(true);
-        when(resultSetMock.getInt(1)).thenReturn(new Random().nextInt(99999));
-        Integer res = accessoryDAO.add(new Accessory("easy case", 1200, "China"));
-        System.out.println(String.format("Generated key equals: '%d'", res));
-        assertNotNull(res);
     }
 
     @Test
