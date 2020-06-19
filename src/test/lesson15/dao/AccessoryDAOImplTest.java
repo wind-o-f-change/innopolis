@@ -55,16 +55,17 @@ public class AccessoryDAOImplTest {
     void addErr() throws SQLException {
         when(connection.prepareStatement(INSERT_INTO_ACCESSORY, PreparedStatement.RETURN_GENERATED_KEYS)).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(0);
-        assertThrows(RuntimeException.class, ()-> accessoryDAO.updateById(accessory));
+
+        assertThrows(RuntimeException.class, () -> accessoryDAO.add(accessory)
+                , "Добавление товара '%s' -> ошибка выполнения!");
     }
 
     @Test
     void add_GenIdErr() throws SQLException {
         when(connection.prepareStatement(INSERT_INTO_ACCESSORY, PreparedStatement.RETURN_GENERATED_KEYS)).thenReturn(preparedStatement);
-        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSetMock);
-        when(resultSetMock.next()).thenReturn(false);
 
-        assertThrows(RuntimeException.class, ()-> accessoryDAO.updateById(accessory));
+        assertThrows(RuntimeException.class, () -> accessoryDAO.add(accessory)
+                , "Ошибка генерации 'id' товара");
     }
 
     @Test
@@ -72,7 +73,7 @@ public class AccessoryDAOImplTest {
         when(connection.prepareStatement(INSERT_INTO_ACCESSORY, PreparedStatement.RETURN_GENERATED_KEYS)).thenReturn(preparedStatement);
         doThrow(SQLException.class).when(preparedStatement).setString(anyInt(), anyString());
 
-        assertNull(accessoryDAO.add(accessory));
+        assertThrows(SQLException.class, () -> accessoryDAO.add(accessory));
 
         verify(connection, times(1)).prepareStatement(INSERT_INTO_ACCESSORY, PreparedStatement.RETURN_GENERATED_KEYS);
         verify(preparedStatement, times(1)).setString(anyInt(), anyString());
@@ -91,7 +92,7 @@ public class AccessoryDAOImplTest {
 
     @Test
     void getById_NPE() {
-        assertThrows(NullPointerException.class, ()-> accessoryDAO.getById(null));
+        assertThrows(NullPointerException.class, () -> accessoryDAO.getById(null));
     }
 
     @Test
@@ -99,7 +100,7 @@ public class AccessoryDAOImplTest {
         when(connection.prepareStatement(SELECT_FROM_ACCESSORY)).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenThrow(SQLException.class);
 
-        assertNull(accessoryDAO.getById(accessory));
+        assertThrows(SQLException.class, () -> accessoryDAO.getById(accessory));
     }
 
     @Test
@@ -107,7 +108,8 @@ public class AccessoryDAOImplTest {
         when(connection.prepareStatement(SELECT_FROM_ACCESSORY)).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenReturn(resultSetMock);
 
-        assertThrows(IllegalArgumentException.class, ()-> accessoryDAO.getById(accessory));
+        assertThrows(IllegalArgumentException.class, () -> accessoryDAO.getById(accessory)
+                , "Продукт 'accessory' с таким id не существует!");
     }
 
     @Test
@@ -115,7 +117,7 @@ public class AccessoryDAOImplTest {
         when(connection.prepareStatement(UPDATE_ACCESSORY)).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(1);
 
-        assertDoesNotThrow(()-> accessoryDAO.updateById(accessory));
+        assertDoesNotThrow(() -> accessoryDAO.updateById(accessory));
 
         verify(connection, times(1)).prepareStatement(UPDATE_ACCESSORY);
         verify(preparedStatement, times(2)).setString(anyInt(), anyString());
@@ -125,7 +127,7 @@ public class AccessoryDAOImplTest {
 
     @Test
     void updateById_NPE() {
-        assertThrows(NullPointerException.class, ()-> accessoryDAO.updateById(null));
+        assertThrows(NullPointerException.class, () -> accessoryDAO.updateById(null));
     }
 
     @Test
@@ -133,7 +135,8 @@ public class AccessoryDAOImplTest {
         when(connection.prepareStatement(UPDATE_ACCESSORY)).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(0);
 
-        assertThrows(RuntimeException.class, ()-> accessoryDAO.updateById(accessory));
+        assertThrows(RuntimeException.class, () -> accessoryDAO.updateById(accessory)
+                , "Заданные параменты товара 'accessory' не изменены! Возможно они совпадают или не найдены.");
     }
 
     @Test
@@ -141,7 +144,7 @@ public class AccessoryDAOImplTest {
         when(connection.prepareStatement(DELETE_FROM_ACCESSORY)).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(1);
 
-        assertDoesNotThrow(()-> accessoryDAO.deleteById(accessory));
+        assertDoesNotThrow(() -> accessoryDAO.deleteById(accessory));
     }
 
     @Test
@@ -154,6 +157,15 @@ public class AccessoryDAOImplTest {
         when(connection.prepareStatement(DELETE_FROM_ACCESSORY)).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(0);
 
-        assertThrows(RuntimeException.class, ()-> accessoryDAO.deleteById(accessory));
+        assertThrows(RuntimeException.class, () -> accessoryDAO.deleteById(accessory)
+                ,"Удаление товара 'accessory' -> ошибка выполнения!");
+    }
+
+    @Test
+    void deleteById_SQLException() throws SQLException {
+        when(connection.prepareStatement(DELETE_FROM_ACCESSORY)).thenReturn(preparedStatement);
+        doThrow(SQLException.class).when(preparedStatement).setInt(anyInt(), anyInt());
+
+        assertThrows(SQLException.class, () -> accessoryDAO.deleteById(accessory));
     }
 }

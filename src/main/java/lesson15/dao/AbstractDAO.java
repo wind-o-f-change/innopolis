@@ -13,20 +13,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Create 08.06.2020
- *
- * @autor Evtushenko Anton
+ * Create by Evtushenko Anton
  */
 
 @NoArgsConstructor
 @RequiredArgsConstructor
 public abstract class AbstractDAO<P extends Product> {
-    private static Logger LOGGER_DAO = LoggerFactory.getLogger(AccessoryDAOImpl.class);
+    private final Logger LOGGER_DAO = LoggerFactory.getLogger(this.getClass());
 
     @NonNull
     Connection cn;
 
-    public Integer add(P product) {
+    public Integer add(P product) throws SQLException {
+        String message = " got in 'add()' method";
+        LOGGER_DAO.debug(product.toString() + message);
 
         try (PreparedStatement ps = cn.prepareStatement(
                 "insert into "
@@ -48,12 +48,18 @@ public abstract class AbstractDAO<P extends Product> {
             }
 
         } catch (SQLException e) {
-            LOGGER_DAO.error(e + " in 'add()' method");
+            LOGGER_DAO.error(e + message);
+            throw e;
+        } catch (RuntimeException e) {
+            LOGGER_DAO.error(e.getMessage(), e);
+            throw e;
         }
-        return null;
     }
 
-    public P getById(P product) {
+    public P getById(P product) throws SQLException {
+        String message = " got in 'getById()' method";
+        LOGGER_DAO.debug(product.toString());
+
         try (PreparedStatement ps = cn.prepareStatement(
                 "select * from " + getTableName(product) + " where id = ?")) {
 
@@ -73,12 +79,18 @@ public abstract class AbstractDAO<P extends Product> {
             return product;
 
         } catch (SQLException e) {
-            LOGGER_DAO.error(e + " in 'getByID()' method");
+            LOGGER_DAO.error(e + message);
+            throw e;
+        } catch (RuntimeException e) {
+            LOGGER_DAO.error(e.getMessage(), e);
+            throw e;
         }
-        return null;
     }
 
-    public void updateById(P product) {
+    public void updateById(P product) throws SQLException {
+        String message = " got in 'updateById()' method";
+        LOGGER_DAO.debug(product.toString() + message);
+
         try (PreparedStatement ps = cn.prepareStatement(
                 "update " + getTableName(product) + " set model = ?, price = ?, manufacturer = ?" +
                         " where id= ?")
@@ -90,15 +102,22 @@ public abstract class AbstractDAO<P extends Product> {
 
             if (ps.executeUpdate() < 1)
                 throw new RuntimeException(String.format(
-                        "Заданные параменты товара '%s' не изменены! Возможно они совпадают."
+                        "Заданные параменты товара '%s' не изменены! Возможно они совпадают или не найдены."
                         , getTableName(product)));
 
         } catch (SQLException e) {
-            LOGGER_DAO.error(e + " in 'updateById()' method");
+            LOGGER_DAO.error(e + message);
+            throw e;
+        } catch (RuntimeException e) {
+            LOGGER_DAO.error(e.getMessage(), e);
+            throw e;
         }
     }
 
-    public void deleteById(P product) {
+    public void deleteById(P product) throws SQLException {
+        String message = " got in 'deleteById()' method";
+        LOGGER_DAO.debug(product.toString() + message);
+
         try (PreparedStatement ps = cn.prepareStatement(
                 "delete from " + getTableName(product) + " where id = ?")
         ) {
@@ -109,7 +128,11 @@ public abstract class AbstractDAO<P extends Product> {
                         , getTableName(product)));
 
         } catch (SQLException e) {
-            LOGGER_DAO.error(e + " in 'deleteById()' method");
+            LOGGER_DAO.error(e + message);
+            throw e;
+        } catch (RuntimeException e) {
+            LOGGER_DAO.error(e.getMessage(), e);
+            throw e;
         }
     }
 
