@@ -43,7 +43,7 @@ public class AccessoryDAOImplTest {
         when(resultSetMock.next()).thenReturn(true);
         when(resultSetMock.getInt(1)).thenReturn(12);
 
-        assertTrue(accessoryDAO.add(new Accessory("easy case", 1200, "China")) > 0);
+        assertTrue(accessoryDAO.add(accessory) > 0);
     }
 
     @Test
@@ -136,7 +136,7 @@ public class AccessoryDAOImplTest {
         when(preparedStatement.executeUpdate()).thenReturn(0);
 
         assertThrows(RuntimeException.class, () -> accessoryDAO.updateById(accessory)
-                , "Заданные параменты товара 'accessory' не изменены! Возможно они совпадают или не найдены.");
+                , "Заданные параметры товара 'accessory' не изменены! Возможно они совпадают или не найдены.");
     }
 
     @Test
