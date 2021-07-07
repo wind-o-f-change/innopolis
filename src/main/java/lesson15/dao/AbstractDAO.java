@@ -13,20 +13,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Create 08.06.2020
- *
- * @autor Evtushenko Anton
+ * Create by Evtushenko Anton
  */
 
 @NoArgsConstructor
 @RequiredArgsConstructor
 public abstract class AbstractDAO<P extends Product> {
-    private static Logger LOGGER_DAO = LoggerFactory.getLogger(AccessoryDAOImpl.class);
+    private final Logger LOGGER_DAO = LoggerFactory.getLogger(this.getClass());
 
     @NonNull
     Connection cn;
 
-    public boolean add(P product) {
+    public Integer add(P product) throws SQLException {
+        String message = " got in 'add()' method";
+        LOGGER_DAO.debug(product.toString() + message);
+
         try (PreparedStatement ps = cn.prepareStatement(
                 "insert into "
                         + getTableName(product)
@@ -35,15 +36,30 @@ public abstract class AbstractDAO<P extends Product> {
             ps.setString(1, product.getModel());
             ps.setInt(2, product.getPrice());
             ps.setString(3, product.getManufacturer());
-            return ps.execute();
+            if (ps.executeUpdate() < 1)
+                throw new RuntimeException(String.format(
+                        "Добавление товара '%s' -> ошибка выполнения!"
+                        , getTableName(product)));
+
+            try (ResultSet generatedKeySet = ps.getGeneratedKeys()) {
+                if (generatedKeySet.next()) {
+                    return generatedKeySet.getInt(1);
+                } else throw new RuntimeException("Ошибка генерации 'id' товара");
+            }
 
         } catch (SQLException e) {
-            LOGGER_DAO.error(e + " in 'add()' method");
+            LOGGER_DAO.error(e + message);
+            throw e;
+        } catch (RuntimeException e) {
+            LOGGER_DAO.error(e.getMessage(), e);
+            throw e;
         }
-        return false;
     }
 
-    public P getById(P product) {
+    public P getById(P product) throws SQLException {
+        String message = " got in 'getById()' method";
+        LOGGER_DAO.debug(product.toString());
+
         try (PreparedStatement ps = cn.prepareStatement(
                 "select * from " + getTableName(product) + " where id = ?")) {
 
@@ -56,17 +72,25 @@ public abstract class AbstractDAO<P extends Product> {
                     product.setManufacturer(resultSet.getString(4));
 
                 } else
-                    throw new IllegalArgumentException(String.format("Продукт %s с таким id не существует", product.getClass().getSimpleName()));
+                    throw new IllegalArgumentException(String.format(
+                            "Продукт '%s' с таким id не существует!"
+                            , getTableName(product)));
             }
             return product;
 
         } catch (SQLException e) {
-            LOGGER_DAO.error(e + " in 'getByID()' method");
+            LOGGER_DAO.error(e + message);
+            throw e;
+        } catch (RuntimeException e) {
+            LOGGER_DAO.error(e.getMessage(), e);
+            throw e;
         }
-        return null;
     }
 
-    public boolean updateById(P product) {
+    public void updateById(P product) throws SQLException {
+        String message = " got in 'updateById()' method";
+        LOGGER_DAO.debug(product.toString() + message);
+
         try (PreparedStatement ps = cn.prepareStatement(
                 "update " + getTableName(product) + " set model = ?, price = ?, manufacturer = ?" +
                         " where id= ?")
@@ -75,25 +99,41 @@ public abstract class AbstractDAO<P extends Product> {
             ps.setInt(2, product.getPrice());
             ps.setString(3, product.getManufacturer());
             ps.setInt(4, product.getId());
-            return ps.execute();
+
+            if (ps.executeUpdate() < 1)
+                throw new RuntimeException(String.format(
+                        "Заданные параменты товара '%s' не изменены! Возможно они совпадают или не найдены."
+                        , getTableName(product)));
 
         } catch (SQLException e) {
-            LOGGER_DAO.error(e + " in 'updateById()' method");
+            LOGGER_DAO.error(e + message);
+            throw e;
+        } catch (RuntimeException e) {
+            LOGGER_DAO.error(e.getMessage(), e);
+            throw e;
         }
-        return false;
     }
 
-    public boolean deleteById(P product) {
+    public void deleteById(P product) throws SQLException {
+        String message = " got in 'deleteById()' method";
+        LOGGER_DAO.debug(product.toString() + message);
+
         try (PreparedStatement ps = cn.prepareStatement(
                 "delete from " + getTableName(product) + " where id = ?")
         ) {
             ps.setInt(1, product.getId());
+            if (ps.executeUpdate() < 1)
+                throw new RuntimeException(String.format(
+                        "Удаление товара '%s' -> ошибка выполнения!"
+                        , getTableName(product)));
 
-            return ps.execute();
         } catch (SQLException e) {
-            LOGGER_DAO.error(e + " in 'deleteById()' method");
+            LOGGER_DAO.error(e + message);
+            throw e;
+        } catch (RuntimeException e) {
+            LOGGER_DAO.error(e.getMessage(), e);
+            throw e;
         }
-        return false;
     }
 
     private String getTableName(P product) {
